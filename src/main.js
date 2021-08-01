@@ -36,6 +36,7 @@ const connectCeloWallet = async function () {
 
 async function approve(_price) {
   const cUSDContract = new kit.web3.eth.Contract(erc20Abi, cUSDContractAddress)
+  
 
   const result = await cUSDContract.methods
     .approve(MPContractAddress, _price)
@@ -173,25 +174,25 @@ document
     getProducts()
   })
 
-document.querySelector("#marketplace").addEventListener("click", async (e) => {
-  if (e.target.className.includes("buyBtn")) {
-    const index = e.target.id
-    notification("⌛ Waiting for payment approval...")
-    try {
-      await approve(products[index].price)
-    } catch (error) {
-      notification(`⚠️ ${error}.`)
+  document.querySelector("#marketplace").addEventListener("click", async (e) => {
+    if (e.target.className.includes("buyBtn")) {
+      const index = e.target.id
+      notification("⌛ Waiting for payment approval...")
+      try {
+        await approve(products[index].price)
+      } catch (error) {
+        notification(`⚠️ ${error}.`)
+      }
+      notification(`⌛ Awaiting payment for "${products[index].name}"...`)
+      try {
+        const result = await contract.methods
+          .buyProduct(index)
+          .send({ from: kit.defaultAccount })
+        notification(`🎉 You successfully bought "${products[index].name}".`)
+        getProducts()
+        getBalance()
+      } catch (error) {
+        notification(`⚠️ ${error}.`)
+      }
     }
-    notification(`⌛ Awaiting payment for "${products[index].name}"...`)
-    try {
-      const result = await contract.methods
-        .buyProduct(index)
-        .send({ from: kit.defaultAccount })
-      notification(`🎉 You successfully bought "${products[index].name}".`)
-      getProducts()
-      getBalance()
-    } catch (error) {
-      notification(`⚠️ ${error}.`)
-    }
-  }
-})  
+  })  
